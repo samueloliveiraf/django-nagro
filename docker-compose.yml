@@ -1,8 +1,10 @@
+version: "3.8"
+
 services:
-  django-nagro:
+  django:
     build: .
-    container_name: django-nagro
-    command: /bin/bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    container_name: django
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/usr/src/app/
     ports:
@@ -11,12 +13,9 @@ services:
       - DEBUG=1
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
     depends_on:
-      - postgres-nagro-dj
-    networks:
-      - rede_prod
+      - postgres
+      - rabbitmq
 
   celery:
     build: .
@@ -27,12 +26,9 @@ services:
     environment:
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
     depends_on:
-      - django-nagro
-    networks:
-      - rede_prod
+      - django
+      - rabbitmq
 
   celery_beat:
     build: .
@@ -43,15 +39,12 @@ services:
     environment:
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
     depends_on:
-      - django-nagro
+      - rabbitmq
+      - django
       - celery
-    networks:
-      - rede_prod
 
-  postgres-nagro-dj:
+  postgres:
     image: postgres:latest
     container_name: db_postgres
     ports:
@@ -62,13 +55,19 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - rede_prod
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
 volumes:
+  rabbitmq_data:
   postgres_data:
-    driver: local
-
-networks:
-  rede_prod:
-    external: true
