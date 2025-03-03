@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  django-nagro:
+    build: .
+    container_name: django-nagro
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
+      - CELERY_BACKEND=rpc://
+    depends_on:
+      - postgres
+    networks:
+      - rede_prod
+
+  celery:
+    build: .
+    container_name: celery
+    command: celery -A config worker -l INFO
+    volumes:
+      - .:/usr/src/app/
+    environment:
+      - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
+      - CELERY_BACKEND=rpc://
+    depends_on:
+      - django
+    networks:
+      - rede_prod
+
+  celery_beat:
+    build: .
+    container_name: celery_beat
+    command: celery -A config beat -l INFO -S django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/usr/src/app/
+    environment:
+      - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
+      - CELERY_BACKEND=rpc://
+    depends_on:
+      - django
+      - celery
+    networks:
+      - rede_prod
+
+  postgres-nagro-dj:
+    image: postgres:latest
+    container_name: db_postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rede_prod
+
+networks:
+  rede_prod:
+    external: true
