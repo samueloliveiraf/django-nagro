@@ -11,6 +11,8 @@ services:
       - DEBUG=1
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
     depends_on:
       - postgres-nagro-dj
     networks:
@@ -25,6 +27,8 @@ services:
     environment:
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
     depends_on:
       - django-nagro
     networks:
@@ -39,6 +43,8 @@ services:
     environment:
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWD=${RABBITMQ_PASSWD}
     depends_on:
       - django-nagro
       - celery
