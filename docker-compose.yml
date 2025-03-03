@@ -16,6 +16,8 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+    networks:
+      - app-network
 
   celery:
     build: .
@@ -29,6 +31,8 @@ services:
     depends_on:
       - django
       - rabbitmq
+    networks:
+      - app-network
 
   celery_beat:
     build: .
@@ -43,6 +47,8 @@ services:
       - rabbitmq
       - django
       - celery
+    networks:
+      - app-network
 
   postgres:
     image: postgres:latest
@@ -55,6 +61,8 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   rabbitmq:
     image: "rabbitmq:3-management"
@@ -67,7 +75,13 @@ services:
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWD}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
 
 volumes:
   rabbitmq_data:
   postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
