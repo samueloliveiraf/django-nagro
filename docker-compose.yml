@@ -14,7 +14,7 @@ services:
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
     depends_on:
-      - postgres
+      - postgres-nagro-dj
     networks:
       - rede_prod
 
@@ -28,7 +28,7 @@ services:
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
     depends_on:
-      - django
+      - django-nagro
     networks:
       - rede_prod
 
@@ -42,7 +42,7 @@ services:
       - CELERY_BROKER=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWD}@rabbitmq:5672/
       - CELERY_BACKEND=rpc://
     depends_on:
-      - django
+      - django-nagro
       - celery
     networks:
       - rede_prod
