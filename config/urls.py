@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from apps.slips.views import UploadSlipAPIView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('upload-slips/', UploadSlipAPIView.as_view(), name='upload-slips'),
 ]
